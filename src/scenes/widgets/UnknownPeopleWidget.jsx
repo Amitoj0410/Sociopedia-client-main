@@ -13,7 +13,7 @@ const UnknownPeopleWidget = ({ userId }) => {
 
   const getUnknownPeople = async () => {
     const response = await fetch(
-      `http://localhost:3001/users/${userId}/unknownPeople`,
+      `https://socialpedia-server-main-v2.onrender.com/users/${userId}/unknownPeople`,
       {
         method: "GET",
         headers: {

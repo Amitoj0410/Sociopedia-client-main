@@ -83,7 +83,7 @@ const Form = () => {
     // formData.append("picturePath", values.picture.name);
 
     const savedUserResponse = await fetch(
-      "http://localhost:3001/auth/register",
+      "https://socialpedia-server-main-v2.onrender.com/auth/register",
       {
         method: "POST",
         body: formData,
@@ -105,11 +105,14 @@ const Form = () => {
 
   const login = async (values, onSubmitProps) => {
     console.log("hello");
-    const loggedInResponse = await fetch("http://localhost:3001/auth/login", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    const loggedInResponse = await fetch(
+      "https://socialpedia-server-main-v2.onrender.com/auth/login",
+      {
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify(values),
+      }
+    );
     console.log("aa gya response");
     const loggedIn = await loggedInResponse.json();
     onSubmitProps.resetForm();
@@ -133,11 +136,14 @@ const Form = () => {
   };
 
   const forgotPassword = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch("http://localhost:3001/auth/login", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    const loggedInResponse = await fetch(
+      "https://socialpedia-server-main-v2.onrender.com/auth/login",
+      {
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify(values),
+      }
+    );
     const loggedIn = await loggedInResponse.json();
     onSubmitProps.resetForm();
     // console.log(loggedIn.user);
@@ -166,7 +172,7 @@ const Form = () => {
   };
 
   // const handleSendOTP = async () => {
-  //   const response = await fetch(`http://localhost:3001/auth/forgotPassword`, {
+  //   const response = await fetch(`https://socialpedia-server-main-v2.onrender.com/auth/forgotPassword`, {
   //     method: "POST",
   //     body: {
   //       email: JSON.stringify(values.email),

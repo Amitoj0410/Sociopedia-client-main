@@ -19,6 +19,7 @@ import {
   Grid,
   Divider,
 } from "@mui/material";
+// import { makeStyles } from "@mui/"
 import {
   Search,
   Message,
@@ -32,6 +33,9 @@ import {
   CloseOutlined,
   Tag,
   TagSharp,
+  AccountCircleRounded,
+  LogoutRounded,
+  LogoutSharp,
 } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
@@ -70,14 +74,24 @@ const Navbar = () => {
   const [searchInput, setSearchInput] = useState("");
   const [searchedPeople, setSearchedPeople] = useState([]);
   const fullName = `${user.firstName} ${user.lastName}`;
+  const fullNameInitial = `${user.firstName.charAt[0]}`;
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl2, setAnchorEl2] = useState(null);
   const open = Boolean(anchorEl);
   const { enqueueSnackbar } = useSnackbar();
+
+  const handleOpen = (event) => {
+    setAnchorEl2(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl2(null);
+  };
 
   const fetchNotifications = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3001/users/${user._id}/notifications`,
+        `https://socialpedia-server-main-v2.onrender.com/users/${user._id}/notifications`,
         {
           method: "GET",
           headers: {
@@ -165,7 +179,7 @@ const Navbar = () => {
   const acceptRequest = async (userId, friendId, notificationId) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/users/${userId}/friends/${friendId}/accept`,
+        `https://socialpedia-server-main-v2.onrender.com/users/${userId}/friends/${friendId}/accept`,
         {
           method: "POST",
           headers: {
@@ -181,7 +195,7 @@ const Navbar = () => {
 
         // Remove notification from backend
         const removeResponse = await fetch(
-          `http://localhost:3001/users/${userId}/removeNotification/${notificationId}`,
+          `https://socialpedia-server-main-v2.onrender.com/users/${userId}/removeNotification/${notificationId}`,
           {
             method: "DELETE",
             headers: {
@@ -205,7 +219,7 @@ const Navbar = () => {
   const declineRequest = async (userId, friendId, notificationId) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/users/${userId}/friends/${friendId}/reject`,
+        `https://socialpedia-server-main-v2.onrender.com/users/${userId}/friends/${friendId}/reject`,
         {
           method: "POST",
           headers: {
@@ -221,7 +235,7 @@ const Navbar = () => {
 
         // Remove notification from backend
         const removeResponse = await fetch(
-          `http://localhost:3001/users/${userId}/removeNotification/${notificationId}`,
+          `https://socialpedia-server-main-v2.onrender.com/users/${userId}/removeNotification/${notificationId}`,
           {
             method: "DELETE",
             headers: {
@@ -246,7 +260,7 @@ const Navbar = () => {
 
   const removeNotif = async (userId, notificationId) => {
     const removeResponse = await fetch(
-      `http://localhost:3001/users/${userId}/removeNotification/${notificationId}`,
+      `https://socialpedia-server-main-v2.onrender.com/users/${userId}/removeNotification/${notificationId}`,
       {
         method: "DELETE",
         headers: {
@@ -261,7 +275,7 @@ const Navbar = () => {
   };
 
   return (
-    <FlexBetween padding="1rem 6%" backgroundColor={alt}>
+    <FlexBetween padding="0.8rem 6%" backgroundColor={alt}>
       <FlexBetween gap="1.75rem">
         <Typography
           fontWeight="bold"
@@ -368,7 +382,7 @@ const Navbar = () => {
 
       {/* DESKTOP NAV */}
       {isNonMobileScreens ? (
-        <FlexBetween gap="1.3rem">
+        <FlexBetween gap="2rem">
           <Button
             variant="outlined"
             color={"error"}
@@ -379,9 +393,9 @@ const Navbar = () => {
           <Tooltip title={<Typography fontSize={13}>Mode</Typography>} arrow>
             <IconButton onClick={() => dispatch(setMode())}>
               {theme.palette.mode === "dark" ? (
-                <DarkMode sx={{ fontSize: "25px" }} />
+                <DarkMode sx={{ fontSize: "30px" }} />
               ) : (
-                <LightMode sx={{ fontSize: "25px" }} />
+                <LightMode sx={{ fontSize: "30px" }} />
               )}
             </IconButton>
           </Tooltip>
@@ -401,7 +415,7 @@ const Navbar = () => {
                 }
                 color="secondary"
               >
-                <Notifications sx={{ fontSize: "25px" }} />
+                <Notifications sx={{ fontSize: "30px" }} />
               </Badge>
             </IconButton>
           </Tooltip>
@@ -791,49 +805,51 @@ const Navbar = () => {
           </Menu>
           <Tooltip title={<Typography fontSize={13}>About</Typography>} arrow>
             <IconButton>
-              <Help sx={{ fontSize: "25px" }} />
+              <Help sx={{ fontSize: "30px" }} />
             </IconButton>
           </Tooltip>
-          <FormControl variant="standard">
-            <Select
-              value={fullName}
-              sx={{
-                backgroundColor: neutralLight,
-                width: "150px",
-                borderRadius: "0.25rem",
-                p: "0.25rem 1rem",
-                "& .MuiSvgIcon-root": {
-                  pr: "0.25rem",
-                  width: "3rem",
-                },
-                "& .MuiSelect-select:focus": {
-                  backgroundColor: neutralLight,
-                },
-              }}
-              input={<InputBase />}
+          <Box>
+            <IconButton onClick={handleOpen}>
+              <Avatar
+                alt={fullName}
+                src={fullNameInitial}
+                sx={{
+                  width: 30,
+                  height: 30,
+                  bgcolor: "primary.main",
+                  color: "white",
+                }}
+              />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl2}
+              open={Boolean(anchorEl2)}
+              onClose={handleClose}
             >
-              <MenuItem value={fullName}>
-                <Typography>{fullName}</Typography>
-              </MenuItem>
-
+              {/* <MenuItem disabled>
+                  <Typography>{fullName}</Typography>
+                </MenuItem> */}
               <MenuItem
                 onClick={() => {
                   navigate("/profile/edit");
+                  handleClose();
                 }}
               >
-                <Typography>Profile</Typography>
+                <AccountCircleRounded sx={{ mr: "5px" }} />
+                <Typography>Edit Profile</Typography>
               </MenuItem>
-
               <MenuItem
                 onClick={() => {
                   dispatch(setLogout());
                   navigate("/");
+                  handleClose();
                 }}
               >
+                <LogoutSharp sx={{ mr: "5px" }} />
                 <Typography>Log Out</Typography>
               </MenuItem>
-            </Select>
-          </FormControl>
+            </Menu>
+          </Box>
         </FlexBetween>
       ) : (
         <IconButton
@@ -872,20 +888,20 @@ const Navbar = () => {
             gap="3rem"
           >
             <IconButton onClick={() => navigate("/trending")}>
-              <TagSharp sx={{ fontSize: "25px" }} />
+              <TagSharp sx={{ fontSize: "30px" }} />
             </IconButton>
             <IconButton
               onClick={() => dispatch(setMode())}
-              sx={{ fontSize: "25px" }}
+              sx={{ fontSize: "30px" }}
             >
               {theme.palette.mode === "dark" ? (
-                <DarkMode sx={{ fontSize: "25px" }} />
+                <DarkMode sx={{ fontSize: "30px" }} />
               ) : (
-                <LightMode sx={{ fontSize: "25px" }} />
+                <LightMode sx={{ fontSize: "30px" }} />
               )}
             </IconButton>
             <IconButton>
-              <Message sx={{ fontSize: "25px" }} />
+              <Message sx={{ fontSize: "30px" }} />
             </IconButton>
             <IconButton
               onClick={handleNotificationClick}
@@ -899,13 +915,13 @@ const Navbar = () => {
                 }
                 color="secondary"
               >
-                <Notifications sx={{ fontSize: "25px" }} />
+                <Notifications sx={{ fontSize: "30px" }} />
               </Badge>
             </IconButton>
             <IconButton>
-              <Help sx={{ fontSize: "25px" }} />
+              <Help sx={{ fontSize: "30px" }} />
             </IconButton>
-            <FormControl variant="standard">
+            {/* <FormControl variant="standard">
               <Select
                 value={fullName}
                 sx={{
@@ -932,7 +948,8 @@ const Navbar = () => {
                     navigate("/profile/edit");
                   }}
                 >
-                  <Typography>Profile</Typography>
+                  <AccountCircleRounded sx={{ mr: "5px" }} />
+                  <Typography>Edit Profile</Typography>
                 </MenuItem>
 
                 <MenuItem
@@ -941,10 +958,53 @@ const Navbar = () => {
                     navigate("/");
                   }}
                 >
+                  <LogoutSharp sx={{ mr: "5px" }} />
                   <Typography>Log Out</Typography>
                 </MenuItem>
               </Select>
-            </FormControl>
+            </FormControl> */}
+            <Box>
+              <IconButton onClick={handleOpen}>
+                <Avatar
+                  alt={fullName}
+                  src={fullNameInitial}
+                  sx={{
+                    width: 30,
+                    height: 30,
+                    bgcolor: "primary.main",
+                    color: "white",
+                  }}
+                />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl2}
+                open={Boolean(anchorEl2)}
+                onClose={handleClose}
+              >
+                {/* <MenuItem disabled>
+                  <Typography>{fullName}</Typography>
+                </MenuItem> */}
+                <MenuItem
+                  onClick={() => {
+                    navigate("/profile/edit");
+                    handleClose();
+                  }}
+                >
+                  <AccountCircleRounded sx={{ mr: "5px" }} />
+                  <Typography>Edit Profile</Typography>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    dispatch(setLogout());
+                    navigate("/");
+                    handleClose();
+                  }}
+                >
+                  <LogoutSharp sx={{ mr: "5px" }} />
+                  <Typography>Log Out</Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
             <FlexBetween
               backgroundColor={neutralLight}
               borderRadius="9px"

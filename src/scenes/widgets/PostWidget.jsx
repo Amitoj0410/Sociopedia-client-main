@@ -59,21 +59,24 @@ const PostWidget = ({
   const navigate = useNavigate();
 
   const patchLike = async () => {
-    const response = await fetch(`http://localhost:3001/posts/${postId}/like`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: loggedInUserId }),
-    });
+    const response = await fetch(
+      `https://socialpedia-server-main-v2.onrender.com/posts/${postId}/like`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: loggedInUserId }),
+      }
+    );
     const updatedPost = await response.json();
     dispatch(setPost({ post: updatedPost }));
   };
 
   const patchCommentLike = async (commId) => {
     const response = await fetch(
-      `http://localhost:3001/posts/${postId}/comment/${commId}/like`,
+      `https://socialpedia-server-main-v2.onrender.com/posts/${postId}/comment/${commId}/like`,
       {
         method: "PATCH",
         headers: {
@@ -90,7 +93,7 @@ const PostWidget = ({
   const handleCommentSubmit = async () => {
     const trimmedComment = newComment.trim();
     const response = await fetch(
-      `http://localhost:3001/posts/${postId}/comment`,
+      `https://socialpedia-server-main-v2.onrender.com/posts/${postId}/comment`,
       {
         method: "POST",
         headers: {
@@ -119,7 +122,7 @@ const PostWidget = ({
   };
 
   const handleWhatsAppShare = () => {
-    const shareableLink = `http://localhost:3001/assets/${picturePath}`;
+    const shareableLink = `https://socialpedia-server-main-v2.onrender.com/assets/${picturePath}`;
     const shareableText = `${description}`;
     const message = `${shareableText}\n${shareableLink}`;
     const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -166,7 +169,7 @@ const PostWidget = ({
   const getPostsByHashtags = async (tag) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/hashtags/${tag}/posts`,
+        `https://socialpedia-server-main-v2.onrender.com/hashtags/${tag}/posts`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
