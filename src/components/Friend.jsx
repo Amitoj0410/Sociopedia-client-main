@@ -1,81 +1,135 @@
+import React, { useEffect, useState } from "react";
 import {
   PersonAddOutlined,
   PersonRemoveOutlined,
   MoreVertOutlined,
   ArrowRight,
 } from "@mui/icons-material";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography, useTheme } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { setFriends } from "state";
+import { setFriendRequestTo, setFriends } from "state";
 import FlexBetween from "./FlexBetween";
 import UserImage from "./UserImage";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { setPosts } from "state";
 import PostCreatedAt from "./PostCreatedAt";
 
-const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
-  //here the friendId is not a friends id but actually it is the id of the person who created the post
+const Friend = ({
+  friendId,
+  name,
+  subtitle,
+  userPicturePath,
+  postId,
+  friendReqs,
+}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
+  const [friendUser, setFriendUser] = useState({ friendRequests: [] }); // Initialize with empty array for friendRequests
   const friends = useSelector((state) => state.user.friends);
-  // console.log(friends[0]);
   const { palette } = useTheme();
   const primaryLight = palette.primary.light;
   const primaryDark = palette.primary.dark;
   const main = palette.neutral.main;
   const medium = palette.neutral.medium;
   const [anchorEl, setAnchorEl] = useState(null);
+  const [check, setCheck] = useState(false);
   const open = Boolean(anchorEl);
-  // console.log(friendId);
-  // console.log(name);
-  // const isFriend = friends.find((friend) => friend._id === friendId);
-  const isFriend = Array.isArray(friends)
-    ? friends.find((friend) => friend._id === friendId)
-    : undefined;
 
-  // console.log(isFriend);
+  const isFriend = friends.find((friend) => friend._id === friendId);
+  const chkFriendReq = useSelector((state) => state.friendRequestsTo);
+  // console.log(chkFriendReq);
+  const sentFriendReq =
+    friendReqs?.includes(_id) ||
+    (chkFriendReq && chkFriendReq.includes(friendId));
+  // const frSent = useSelector((state) => state.friendRequestsTo);
+
+  // const sentFriendReq = useSelector((state) => state.friendRequestsTo);
+
   const handleMoreIconClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
 
   const patchFriend = async () => {
-    const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/users/${_id}/${friendId}`,
-      {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+    try {
+      const response = await fetch(
+        `http://localhost:3001/users/${_id}/${friendId}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        dispatch(setFriends({ friends: data }));
+      } else {
+        throw new Error("Failed to update friends list");
       }
-    );
-    const data = await response.json();
-    dispatch(setFriends({ friends: data }));
+    } catch (error) {
+      console.error("Error updating friends list:", error);
+    }
+  };
+
+  const sendRequest = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/users/${_id}/friends/${friendId}/request`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        dispatch(setFriendRequestTo(data._id));
+      } else {
+        throw new Error("Failed to send friend request");
+      }
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+    }
   };
 
   const deletePost = async () => {
-    const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/posts/${postId}/delete`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+    try {
+      const response = await fetch(
+        `http://localhost:3001/posts/${postId}/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        const posts = await response.json();
+        dispatch(setPosts({ posts }));
+      } else {
+        throw new Error("Failed to delete post");
       }
-    );
-    const posts = await response.json();
-    dispatch(setPosts({ posts }));
-    // console.log(posts);
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
+
+  // useEffect(() => {
+  //   console.log(chkFriendReq);
+  // }, [chkFriendReq]);
 
   return (
     <FlexBetween>
@@ -108,7 +162,6 @@ const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
             >
               {name}&nbsp;
             </Typography>
-            {/* new */}
             {postId && (
               <Box display="flex">
                 <ArrowRight />
@@ -151,16 +204,39 @@ const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
             </MenuItem>
           </Menu>
         </>
-      ) : (
+      ) : sentFriendReq && !isFriend ? (
+        <Box
+          sx={{
+            border: "1px solid red",
+            padding: "3px",
+            borderRadius: "4px",
+          }}
+        >
+          <Typography variant="body1">Request Sent</Typography>
+        </Box>
+      ) : isFriend && !sentFriendReq ? (
         <IconButton
           onClick={() => patchFriend()}
           sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
         >
-          {isFriend ? (
+          <Tooltip
+            title={<Typography fontSize={13}>Remove Friend</Typography>}
+            arrow
+          >
             <PersonRemoveOutlined sx={{ color: primaryDark }} />
-          ) : (
+          </Tooltip>
+        </IconButton>
+      ) : (
+        <IconButton
+          onClick={() => sendRequest()}
+          sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
+        >
+          <Tooltip
+            title={<Typography fontSize={13}>Add Friend</Typography>}
+            arrow
+          >
             <PersonAddOutlined sx={{ color: primaryDark }} />
-          )}
+          </Tooltip>
         </IconButton>
       )}
     </FlexBetween>

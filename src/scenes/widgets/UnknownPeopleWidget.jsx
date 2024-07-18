@@ -13,7 +13,7 @@ const UnknownPeopleWidget = ({ userId }) => {
 
   const getUnknownPeople = async () => {
     const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/users/${userId}/unknownPeople`,
+      `http://localhost:3001/users/${userId}/unknownPeople`,
       {
         method: "GET",
         headers: {
@@ -28,6 +28,14 @@ const UnknownPeopleWidget = ({ userId }) => {
   useEffect(() => {
     getUnknownPeople();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     getUnknownPeople();
+  //   }, 5000);
+
+  //   return () => clearInterval(intervalId);
+  // }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <WidgetWrapper>
@@ -52,6 +60,9 @@ const UnknownPeopleWidget = ({ userId }) => {
               // userPicturePath={friend.picturePath}
               userPicturePath={
                 person.picturePath ? person.picturePath : "p1.jpeg"
+              }
+              friendReqs={
+                person.friendRequests?.length > 0 ? person.friendRequests : []
               }
             />
           ))}

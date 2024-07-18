@@ -1,61 +1,28 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPosts } from "state";
 import PostWidget from "./PostWidget";
 import WidgetWrapper from "components/WidgetWrapper";
 import { Box, Button, Typography } from "@mui/material";
 
-const PostsWidget = ({ userId, isProfile = false }) => {
+const PostsByHashtagWidget = () => {
   const dispatch = useDispatch();
-  const posts = useSelector((state) => state.posts);
   const token = useSelector((state) => state.token);
+  const hashtagPosts = useSelector((state) => state.hashtagPosts) || []; // Default to empty array if null
   const [visiblePosts, setVisiblePosts] = useState(5);
 
-  const getPosts = async () => {
-    const response = await fetch(`http://localhost:3001/posts`, {
-      //doubt : /posts/ in fetch
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await response.json();
-    dispatch(setPosts({ posts: data }));
-  };
-
-  const getUserPosts = async () => {
-    const response = await fetch(
-      `http://localhost:3001/posts/${userId}/posts`,
-      {
-        //doubt : /posts/ in fetch
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const data = await response.json();
-    dispatch(setPosts({ posts: data }));
-  };
-
   useEffect(() => {
-    if (isProfile) {
-      getUserPosts();
-    } else {
-      getPosts();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    console.log(hashtagPosts);
+  }, [hashtagPosts]);
 
-  const visiblePostsData = Array.isArray(posts)
-    ? posts.slice(0, visiblePosts)
-    : [];
+  const visiblePostsData = hashtagPosts.slice(0, visiblePosts);
+
   const handleLoadMore = () => {
     setVisiblePosts((prevVisiblePosts) => prevVisiblePosts + 5);
   };
 
   return (
     <>
-      {Array.isArray(visiblePostsData) && visiblePostsData.length > 0 ? (
+      {visiblePostsData.length > 0 ? (
         visiblePostsData.map(
           ({
             _id,
@@ -92,10 +59,12 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           sx={{ wordWrap: "break-word" }}
           overflow={"hidden"}
         >
-          <Typography variant="h3">User didn't posted anything yet</Typography>
+          <Typography variant="h3">
+            Select a Trending hashtag to view its posts
+          </Typography>
         </WidgetWrapper>
       )}
-      {posts.length > visiblePosts && (
+      {hashtagPosts.length > visiblePosts && (
         <Box display="flex" justifyContent="center">
           <Button variant="contained" onClick={handleLoadMore}>
             Load More
@@ -106,4 +75,4 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   );
 };
 
-export default PostsWidget;
+export default PostsByHashtagWidget;

@@ -9,7 +9,6 @@ import {
   Send,
   ArrowRight,
 } from "@mui/icons-material";
-
 import {
   Box,
   Divider,
@@ -29,7 +28,8 @@ import IsCommentLiked from "components/IsCommentLiked";
 import SpecialWidgetWrapper from "components/SpecialWidgetWrapper";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPost } from "state";
+import { useNavigate } from "react-router-dom";
+import { setHashtagPosts, setPost } from "state";
 
 const PostWidget = ({
   postId,
@@ -52,31 +52,28 @@ const PostWidget = ({
   const [newComment, setNewComment] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const splittedDesc = description.split("\n");
 
   const { palette } = useTheme();
   const main = palette.neutral.main;
   const primary = palette.primary.main;
+  const navigate = useNavigate();
 
   const patchLike = async () => {
-    const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/posts/${postId}/like`,
-      {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: loggedInUserId }),
-      }
-    );
+    const response = await fetch(`http://localhost:3001/posts/${postId}/like`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: loggedInUserId }),
+    });
     const updatedPost = await response.json();
     dispatch(setPost({ post: updatedPost }));
   };
 
   const patchCommentLike = async (commId) => {
     const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/posts/${postId}/comment/${commId}/like`,
+      `http://localhost:3001/posts/${postId}/comment/${commId}/like`,
       {
         method: "PATCH",
         headers: {
@@ -93,7 +90,7 @@ const PostWidget = ({
   const handleCommentSubmit = async () => {
     const trimmedComment = newComment.trim();
     const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/posts/${postId}/comment`,
+      `http://localhost:3001/posts/${postId}/comment`,
       {
         method: "POST",
         headers: {
@@ -122,7 +119,7 @@ const PostWidget = ({
   };
 
   const handleWhatsAppShare = () => {
-    const shareableLink = `https://socialpedia-serverr.onrender.com/assets/${picturePath}`;
+    const shareableLink = `http://localhost:3001/assets/${picturePath}`;
     const shareableText = `${description}`;
     const message = `${shareableText}\n${shareableLink}`;
     const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -137,6 +134,63 @@ const PostWidget = ({
     var resultArray = currentComment.split(":");
     var secondPart = resultArray.slice(1).join(":");
     return secondPart;
+  };
+
+  const parseTextWithHashtags = (text, primaryColor, handleHashtagClick) => {
+    const parts = text.split(/(#[^\s]+)/g); // Split by hashtags
+    return parts.map((part, index) =>
+      part.startsWith("#") ? (
+        <span
+          key={index}
+          style={{
+            color: primaryColor,
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+          onMouseOver={(e) => {
+            e.target.style.textDecoration = "underline";
+          }}
+          onMouseOut={(e) => {
+            e.target.style.textDecoration = "none";
+          }}
+          onClick={() => handleHashtagClick(part)}
+        >
+          {part}
+        </span>
+      ) : (
+        <span key={index}>{part}</span>
+      )
+    );
+  };
+
+  const getPostsByHashtags = async (tag) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/hashtags/${tag}/posts`,
+        {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts by hashtag");
+      }
+      const data = await response.json();
+      dispatch(setHashtagPosts(data));
+      console.log(`Fetched posts for hashtag ${tag}:`, data); // Log to verify fetched data
+    } catch (error) {
+      console.error("Error fetching posts by hashtag:", error.message);
+    }
+  };
+
+  const handleHashtagClick = (hashtag) => {
+    console.log(`Clicked on hashtag: ${hashtag}`);
+    const cleanHashtag = hashtag.substring(1);
+
+    // alert("hashtag clicked");
+    // Add your onClick logic here
+    navigate("/trending");
+    getPostsByHashtags(cleanHashtag);
   };
 
   return (
@@ -164,12 +218,7 @@ const PostWidget = ({
         }}
         className="inner-icons"
       >
-        {splittedDesc.map((singleLine, index) => (
-          <React.Fragment key={index}>
-            {singleLine}
-            <br />
-          </React.Fragment>
-        ))}
+        {parseTextWithHashtags(description, primary, handleHashtagClick)}
       </Typography>
       {picturePath && (
         <img

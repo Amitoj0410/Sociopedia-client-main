@@ -17,7 +17,7 @@ const LoadSearchResults = ({ type, value }) => {
 
   const getSearchedUsers = async () => {
     const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/users/search?firstName=${value}`,
+      `http://localhost:3001/users/search?firstName=${value}`,
       {
         method: "GET",
         headers: {
@@ -31,7 +31,7 @@ const LoadSearchResults = ({ type, value }) => {
 
   const getSearchedPosts = async () => {
     const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/posts/search?description=${value}`,
+      `http://localhost:3001/posts/search?description=${value}`,
       {
         method: "GET",
         headers: {

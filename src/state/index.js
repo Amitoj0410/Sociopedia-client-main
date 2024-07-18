@@ -12,6 +12,9 @@ const initialState = {
     people: [],
     posts: [],
   },
+  hashtagPosts: [],
+  friendRequestsTo: [],
+  notifications: [],
 };
 
 export const authSlice = createSlice({
@@ -24,6 +27,7 @@ export const authSlice = createSlice({
     setLogin: (state, action) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.notifications = action.payload.notifications;
     },
     setLogout: (state, action) => {
       state.user = null;
@@ -33,6 +37,8 @@ export const authSlice = createSlice({
       state.searchValue = "";
       state.searchResults.people = [];
       state.searchResults.posts = [];
+      state.hashtagPosts = [];
+      state.friendRequestsTo = []; // Reset friend requests on logout
     },
     setFriends: (state, action) => {
       if (state.user) {
@@ -40,6 +46,9 @@ export const authSlice = createSlice({
       } else {
         console.error("user friends non-existent :(");
       }
+    },
+    setFriendRequestTo: (state, action) => {
+      state.friendRequestsTo.push(action.payload);
     },
     setUnknownPeople: (state, action) => {
       if (state.user) {
@@ -80,6 +89,24 @@ export const authSlice = createSlice({
     setSearchResults: (state, action) => {
       state.searchResults = action.payload;
     },
+    setHashtagPosts: (state, action) => {
+      state.hashtagPosts = action.payload;
+    },
+    setNotifications: (state, action) => {
+      state.notifications = action.payload;
+    },
+    removeNotification: (state, action) => {
+      state.notifications = state.notifications.filter(
+        (notification) => notification._id !== action.payload
+      );
+    },
+    // sentFriendRequestTo: (state, action) => {
+    //   if (state.user) {
+    //     state.user.friendRequestsSentTo = action.payload.friendRequests;
+    //   } else {
+    //     console.error("user non-existent :(");
+    //   }
+    // },
   },
 });
 
@@ -98,5 +125,9 @@ export const {
   setSearchType,
   setSearchValue,
   setSearchResults,
+  setHashtagPosts,
+  setFriendRequestTo,
+  setNotifications,
+  removeNotification,
 } = authSlice.actions;
 export default authSlice.reducer;

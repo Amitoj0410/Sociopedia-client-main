@@ -3,6 +3,7 @@ import HomePage from "scenes/homePage"; //Code written in jsconfig.json actually
 import LoginPage from "scenes/loginPage";
 import ProfilePage from "scenes/profilePage";
 import SearchPage from "scenes/searchPage";
+import TrendingPage from "scenes/trendingPage";
 import NotFoundPage from "scenes/notFoundPage";
 import { useMemo, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,6 +13,7 @@ import { themeSettings } from "theme";
 import EditProfilePage from "scenes/editProfile";
 import { setLogout } from "state";
 import { jwtDecode } from "jwt-decode";
+import { SnackbarProvider } from "notistack";
 
 function App() {
   const dispatch = useDispatch();
@@ -46,32 +48,41 @@ function App() {
       <BrowserRouter>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Routes>
-            <Route
-              path="/"
-              element={isAuth ? <Navigate to="/home" /> : <LoginPage />}
-            />
-            <Route
-              path="/home"
-              element={isAuth ? <HomePage /> : <Navigate to="/" />}
-            />
-            <Route
-              path="/profile/:userId"
-              element={isAuth ? <ProfilePage /> : <Navigate to="/" />}
-            />
-            <Route
-              path="/profile/edit"
-              element={isAuth ? <EditProfilePage /> : <Navigate to="/" />}
-            />
-            <Route
-              path="/search"
-              element={isAuth ? <SearchPage /> : <Navigate to="/" />}
-            />
-            <Route
-              path="*"
-              element={isAuth ? <NotFoundPage /> : <Navigate to="/" />}
-            />
-          </Routes>
+          <SnackbarProvider
+            maxSnack={3}
+            // anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <Routes>
+              <Route
+                path="/"
+                element={isAuth ? <Navigate to="/home" /> : <LoginPage />}
+              />
+              <Route
+                path="/home"
+                element={isAuth ? <HomePage /> : <Navigate to="/" />}
+              />
+              <Route
+                path="/profile/:userId"
+                element={isAuth ? <ProfilePage /> : <Navigate to="/" />}
+              />
+              <Route
+                path="/profile/edit"
+                element={isAuth ? <EditProfilePage /> : <Navigate to="/" />}
+              />
+              <Route
+                path="/search"
+                element={isAuth ? <SearchPage /> : <Navigate to="/" />}
+              />
+              <Route
+                path="/trending"
+                element={isAuth ? <TrendingPage /> : <Navigate to="/" />}
+              />
+              <Route
+                path="*"
+                element={isAuth ? <NotFoundPage /> : <Navigate to="/" />}
+              />
+            </Routes>
+          </SnackbarProvider>
         </ThemeProvider>
       </BrowserRouter>
     </div>

@@ -12,6 +12,7 @@ import {
   useTheme,
   IconButton,
   Tooltip,
+  Modal,
 } from "@mui/material";
 import UserImage from "components/UserImage";
 import FlexBetween from "components/FlexBetween";
@@ -28,15 +29,22 @@ const UserWidget = ({ userId, picturePath }) => {
   const dark = palette.neutral.dark;
   const medium = palette.neutral.medium;
   const main = palette.neutral.main;
+  const loggedUser = useSelector((state) => state.user);
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const getUser = async () => {
-    const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/users/${userId}`,
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const response = await fetch(`http://localhost:3001/users/${userId}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     const data = await response.json();
     setUser(data);
@@ -94,7 +102,53 @@ const UserWidget = ({ userId, picturePath }) => {
         // onClick={() => navigate(`/profile/${userId}`)}
       >
         <FlexBetween gap="1rem">
-          <UserImage image={picturePath} />
+          <Box onClick={handleOpen} sx={{ "&:hover": { cursor: "pointer" } }}>
+            <UserImage image={picturePath} />
+          </Box>
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="enlarged-user-image"
+            aria-describedby="enlarged-user-image-description"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Box
+              sx={{
+                position: "relative",
+                width: "40%",
+                height: "60%",
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                objectFit: "contain",
+              }}
+            >
+              {/* <UserImage
+                image={picturePath}
+                style={{ width: "100%", height: "100%" }}
+              /> */}
+              <UserImage
+                image={picturePath}
+                size="400px"
+                // style={{
+                //   width: "90%",
+                //   height: "auto",
+                //   maxWidth: "100%",
+                //   maxHeight: "100%",
+                // }}
+              />
+            </Box>
+          </Modal>
+
+          {/* ----------------------------------------------------- */}
           <Box>
             <Typography
               variant="h4"
@@ -115,16 +169,18 @@ const UserWidget = ({ userId, picturePath }) => {
             </Typography>
           </Box>
         </FlexBetween>
-        <Tooltip title="Edit">
-          <IconButton
-            onClick={() => {
-              navigate("/profile/edit");
-            }}
-            sx={{ border: "2px solid #3f51b5" }}
-          >
-            <ManageAccountsOutlined sx={{ fontSize: "25px" }} />
-          </IconButton>
-        </Tooltip>
+        {loggedUser._id === userId && (
+          <Tooltip title={<Typography fontSize={13}>Edit</Typography>} arrow>
+            <IconButton
+              onClick={() => {
+                navigate("/profile/edit");
+              }}
+              sx={{ border: "2px solid #3f51b5" }}
+            >
+              <ManageAccountsOutlined sx={{ fontSize: "25px" }} />
+            </IconButton>
+          </Tooltip>
+        )}
       </FlexBetween>
 
       <Divider />

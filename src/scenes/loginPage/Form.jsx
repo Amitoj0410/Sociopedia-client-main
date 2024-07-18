@@ -83,7 +83,7 @@ const Form = () => {
     // formData.append("picturePath", values.picture.name);
 
     const savedUserResponse = await fetch(
-      "https://socialpedia-serverr.onrender.com/auth/register",
+      "http://localhost:3001/auth/register",
       {
         method: "POST",
         body: formData,
@@ -105,14 +105,11 @@ const Form = () => {
 
   const login = async (values, onSubmitProps) => {
     console.log("hello");
-    const loggedInResponse = await fetch(
-      "https://socialpedia-serverr.onrender.com/auth/login",
-      {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify(values),
-      }
-    );
+    const loggedInResponse = await fetch("http://localhost:3001/auth/login", {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify(values),
+    });
     console.log("aa gya response");
     const loggedIn = await loggedInResponse.json();
     onSubmitProps.resetForm();
@@ -123,6 +120,7 @@ const Form = () => {
         setLogin({
           user: loggedIn.user,
           token: loggedIn.token,
+          notifications: loggedIn.user.notifications,
         })
       );
       navigate("/home");
@@ -135,14 +133,11 @@ const Form = () => {
   };
 
   const forgotPassword = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch(
-      "https://socialpedia-serverr.onrender.com/auth/login",
-      {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify(values),
-      }
-    );
+    const loggedInResponse = await fetch("http://localhost:3001/auth/login", {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify(values),
+    });
     const loggedIn = await loggedInResponse.json();
     onSubmitProps.resetForm();
     // console.log(loggedIn.user);
@@ -171,7 +166,7 @@ const Form = () => {
   };
 
   // const handleSendOTP = async () => {
-  //   const response = await fetch(`https://socialpedia-serverr.onrender.com/auth/forgotPassword`, {
+  //   const response = await fetch(`http://localhost:3001/auth/forgotPassword`, {
   //     method: "POST",
   //     body: {
   //       email: JSON.stringify(values.email),
@@ -359,6 +354,31 @@ const Form = () => {
                 helperText={touched.password && errors.password}
                 sx={{ gridColumn: "span 4" }}
               />
+            )}
+            {/* Trying create fake person credentials btn */}
+            {isLogin && (
+              <Button
+                fullWidth
+                // type="submit"
+                sx={{
+                  // m: "2rem 0",
+                  p: "1rem",
+                  backgroundColor: isButtonDisabled
+                    ? palette.neutral.light
+                    : "red",
+                  color: palette.background.alt,
+                  "&:hover": { color: "red" },
+                  gridColumn: "span 4",
+                }}
+                disabled={isButtonDisabled}
+                onClick={() => {
+                  // console.log("hii amy");
+                  setFieldValue("email", "fakeperson@gmail.com");
+                  setFieldValue("password", "123456");
+                }}
+              >
+                USE FAKE PERSON CREDENTIALS
+              </Button>
             )}
           </Box>
 

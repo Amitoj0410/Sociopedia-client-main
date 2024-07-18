@@ -27,8 +27,8 @@ const NotFoundPage = () => {
         <Button
           component={Link}
           to="/"
-          variant="outlined"
-          color="primary"
+          variant="contained"
+          color="error"
           size="large"
         >
           Go back home

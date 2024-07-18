@@ -59,14 +59,11 @@ const MyPostWidget = ({ picturePath, userId }) => {
         formData.append("video", video);
         // formData.append("videoPath", video.name);
       }
-      const response = await fetch(
-        `https://socialpedia-serverr.onrender.com/posts`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
+      const response = await fetch(`http://localhost:3001/posts`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }

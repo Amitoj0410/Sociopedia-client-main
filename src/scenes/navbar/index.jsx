@@ -1,16 +1,23 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   IconButton,
   InputBase,
   Typography,
   Select,
-  MenuItem,
   FormControl,
   useTheme,
   useMediaQuery,
   List,
   ListItem,
+  Tooltip,
+  Button,
+  Badge,
+  Menu,
+  MenuItem,
+  Avatar,
+  Grid,
+  Divider,
 } from "@mui/material";
 import {
   Search,
@@ -19,36 +26,100 @@ import {
   LightMode,
   Notifications,
   Help,
-  Menu,
+  Menu as MenuIcon,
   Close,
   SearchOutlined,
   CloseOutlined,
+  Tag,
+  TagSharp,
 } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-import { setMode, setLogout, setSearchType } from "state";
+import {
+  setMode,
+  setLogout,
+  setSearchType,
+  setFriends,
+  removeNotification,
+  setNotifications,
+} from "state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
 import { setSearchValue } from "state";
 import UserImage from "components/UserImage";
+import { SnackbarProvider, useSnackbar } from "notistack";
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
+  const notifications = useSelector((state) => state.notifications);
+  console.log(notifications);
   const searchValue = useSelector((state) => state.searchValue);
   const token = useSelector((state) => state.token);
-  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+  const isNonMobileScreens = useMediaQuery("(min-width: 1093px)");
   const theme = useTheme();
   const neutralLight = theme.palette.neutral.light;
   const background = theme.palette.background.default;
   const primaryLight = theme.palette.primary.light;
+  const primary = theme.palette.primary.main;
   const alt = theme.palette.background.alt;
   const main = theme.palette.neutral.main;
   const medium = theme.palette.neutral.medium;
   const [searchInput, setSearchInput] = useState("");
   const [searchedPeople, setSearchedPeople] = useState([]);
   const fullName = `${user.firstName} ${user.lastName}`;
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/users/${user._id}/notifications`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const newNotifications = await response.json();
+        dispatch(setNotifications(newNotifications));
+      } else {
+        console.error("Failed to fetch notifications");
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(fetchNotifications, 5000); // Fetch notifications every 5 seconds
+    return () => clearInterval(intervalId); // Cleanup the interval on component unmount
+  }, []);
+
+  // const handleSearchChange = (e) => {
+  //   setSearchInput(e.target.value);
+  // };
+
+  // const handleSearchKeyDown = (e) => {
+  //   if (e.key === "Enter") {
+  //     handleSearch();
+  //   }
+  // };
+
+  // const handleSearch = () => {
+  //   if (searchInput.trim().length > 0) {
+  //     dispatch(setSearchValue(searchInput.trim()));
+  //     dispatch(setSearchType("people"));
+  //     navigate("/search");
+  //   }
+  // };
 
   const searchOnChange = async (e) => {
     const value = e.target.value;
@@ -83,6 +154,112 @@ const Navbar = () => {
     }
   };
 
+  const handleNotificationClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleNotificationClose = () => {
+    setAnchorEl(null);
+  };
+
+  const acceptRequest = async (userId, friendId, notificationId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/users/${userId}/friends/${friendId}/accept`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const updatedFriends = await response.json();
+        dispatch(setFriends({ friends: updatedFriends }));
+
+        // Remove notification from backend
+        const removeResponse = await fetch(
+          `http://localhost:3001/users/${userId}/removeNotification/${notificationId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!removeResponse.ok) {
+          console.error("Failed to remove notification from backend");
+        }
+      } else {
+        console.error("Failed to accept friend request");
+      }
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+    }
+  };
+
+  const declineRequest = async (userId, friendId, notificationId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/users/${userId}/friends/${friendId}/reject`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const updatedFriends = await response.json();
+        dispatch(setFriends({ friends: updatedFriends }));
+
+        // Remove notification from backend
+        const removeResponse = await fetch(
+          `http://localhost:3001/users/${userId}/removeNotification/${notificationId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!removeResponse.ok) {
+          console.error("Failed to remove notification from backend");
+        }
+      } else {
+        console.error("Failed to accept friend request");
+      }
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+    }
+  };
+
+  // useEffect(() => {}, [notifications]);
+
+  const removeNotif = async (userId, notificationId) => {
+    const removeResponse = await fetch(
+      `http://localhost:3001/users/${userId}/removeNotification/${notificationId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!removeResponse.ok) {
+      console.error("Failed to remove notification from backend");
+    }
+  };
+
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
       <FlexBetween gap="1.75rem">
@@ -105,21 +282,10 @@ const Navbar = () => {
             <FlexBetween
               backgroundColor={neutralLight}
               borderRadius="9px"
-              gap="0.5rem"
+              gap="0.2rem"
               padding="0 1rem"
               position="relative"
             >
-              {/* <InputBase
-                placeholder="Search..."
-                value={searchInput}
-                onChange={searchOnChange}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                  }
-                }}
-                
-              /> */}
               <InputBase
                 placeholder="Search..."
                 value={searchInput}
@@ -130,10 +296,10 @@ const Navbar = () => {
                   }
                 }}
                 sx={{
-                  fontSize: "16px", // Adjust font size
-                  padding: "8px", // Adjust padding
-                  height: "40px", // Adjust height
-                  width: "200px", // Adjust width
+                  fontSize: "16px",
+                  padding: "8px",
+                  height: "40px",
+                  width: "200px",
                 }}
               />
               {searchedPeople.length > 0 && (
@@ -142,7 +308,6 @@ const Navbar = () => {
                     setSearchedPeople([]);
                     setSearchInput("");
                   }}
-                  // sx={{ border: "1px solid grey" }}
                 >
                   <CloseOutlined />
                 </IconButton>
@@ -203,24 +368,433 @@ const Navbar = () => {
 
       {/* DESKTOP NAV */}
       {isNonMobileScreens ? (
-        <FlexBetween gap="2rem">
-          <IconButton onClick={() => dispatch(setMode())}>
-            {theme.palette.mode === "dark" ? (
-              <DarkMode sx={{ fontSize: "25px" }} />
+        <FlexBetween gap="1.3rem">
+          <Button
+            variant="outlined"
+            color={"error"}
+            onClick={() => navigate("/trending")}
+          >
+            Trending
+          </Button>
+          <Tooltip title={<Typography fontSize={13}>Mode</Typography>} arrow>
+            <IconButton onClick={() => dispatch(setMode())}>
+              {theme.palette.mode === "dark" ? (
+                <DarkMode sx={{ fontSize: "25px" }} />
+              ) : (
+                <LightMode sx={{ fontSize: "25px" }} />
+              )}
+            </IconButton>
+          </Tooltip>
+          <Tooltip
+            title={<Typography fontSize={13}>Notifications</Typography>}
+            arrow
+          >
+            <IconButton
+              onClick={handleNotificationClick}
+              aria-controls={open ? "notification-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+            >
+              <Badge
+                badgeContent={
+                  notifications.length > 0 ? notifications.length : null
+                }
+                color="secondary"
+              >
+                <Notifications sx={{ fontSize: "25px" }} />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+
+          <Menu
+            id="notification-menu"
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleNotificationClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            PaperProps={{
+              elevation: 1,
+              sx: {
+                mt: 1.5,
+                "& .MuiList-root": {
+                  minWidth: "20ch",
+                },
+              },
+            }}
+          >
+            {/* {notifications?.length === 0 ? (
+              <MenuItem disabled>No notifications</MenuItem>
             ) : (
-              <LightMode sx={{ fontSize: "25px" }} />
+              notifications.map((notification) => (
+                <>
+                  <MenuItem
+                    key={notification._id}
+                    onClick={() => {
+                      navigate(`/profile/${notification.fromUser._id}`);
+                    }}
+                  >
+                    <Grid container alignItems="center" spacing={3}>
+                      <Grid item>
+                        <Avatar
+                          src={notification.fromUser.picturePath}
+                          sx={{ width: "50px", height: "50px" }}
+                        />
+                      </Grid>
+                      <Grid item xs>
+                        <Box>
+                          <Typography variant="subtitle1">
+                            {`${notification.fromUser.firstName} ${notification.fromUser.lastName}`}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {notification.fromUser.occupation}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {notification.fromUser.location}
+                          </Typography>
+                          <Typography variant="body2" color="primary" mt={1}>
+                            Friend Request
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item>
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          gap={1}
+                          ml={2}
+                        >
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              acceptRequest(
+                                user._id,
+                                notification.fromUser._id,
+                                notification._id
+                              );
+                              dispatch(removeNotification(notification._id));
+                              // handleNotificationClose();
+                              enqueueSnackbar("Friend Request Accepted", {
+                                variant: "success",
+                              });
+                            }}
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              declineRequest(
+                                user._id,
+                                notification.fromUser._id,
+                                notification._id
+                              );
+                              dispatch(removeNotification(notification._id));
+                              // handleNotificationClose();
+                              enqueueSnackbar("Friend Request Declined", {
+                                variant: "warning",
+                              });
+                            }}
+                          >
+                            Decline
+                          </Button>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </MenuItem>
+                  <Divider />
+                </>
+              ))
+            )} */}
+
+            {/* {notifications?.length === 0 ? (
+              <MenuItem disabled>No notifications</MenuItem>
+            ) : (
+              notifications.map((notification) => (
+                <React.Fragment key={notification._id}>
+                  <MenuItem
+                    onClick={() => {
+                      navigate(`/profile/${notification.fromUser._id}`);
+                    }}
+                  >
+                    <Grid container alignItems="center" spacing={3}>
+                      <Grid item>
+                        <Avatar
+                          src={notification.fromUser.picturePath}
+                          sx={{ width: "50px", height: "50px" }}
+                        />
+                      </Grid>
+                      <Grid item xs>
+                        <Box>
+                          <Typography variant="subtitle1">
+                            {`${notification.fromUser.firstName} ${notification.fromUser.lastName}`}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {notification.fromUser.occupation}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {notification.fromUser.location}
+                          </Typography>
+                          {notification.type === "friend_request" && (
+                            <Typography variant="body2" color="primary" mt={1}>
+                              Friend Request
+                            </Typography>
+                          )}
+                          {notification.type === "post_liked" && (
+                            <>
+                              <Typography
+                                variant="body2"
+                                color="primary"
+                                mt={1}
+                              >
+                                Liked your post
+                              </Typography>
+                              <Typography variant="body2" color="textSecondary">
+                                {notification.post.description}
+                              </Typography>
+                            </>
+                          )}
+                        </Box>
+                      </Grid>
+                      {notification.type === "friend_request" && (
+                        <Grid item>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            gap={1}
+                            ml={2}
+                          >
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                acceptRequest(
+                                  user._id,
+                                  notification.fromUser._id,
+                                  notification._id
+                                );
+                                dispatch(removeNotification(notification._id));
+                                enqueueSnackbar("Friend Request Accepted", {
+                                  variant: "success",
+                                });
+                              }}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                declineRequest(
+                                  user._id,
+                                  notification.fromUser._id,
+                                  notification._id
+                                );
+                                dispatch(removeNotification(notification._id));
+                                enqueueSnackbar("Friend Request Declined", {
+                                  variant: "warning",
+                                });
+                              }}
+                            >
+                              Decline
+                            </Button>
+                          </Box>
+                        </Grid>
+                      )}
+                      <Grid item>
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dispatch(removeNotification(notification._id));
+                            //remove from backend aswell
+                            removeNotif(user._id, notification._id);
+                            enqueueSnackbar("Notification Removed", {
+                              variant: "info",
+                            });
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </MenuItem>
+                  <Divider />
+                </React.Fragment>
+              ))
+            )} */}
+            {notifications?.length === 0 ? (
+              <MenuItem disabled>No notifications</MenuItem>
+            ) : (
+              notifications.map((notification) => (
+                <React.Fragment key={notification._id}>
+                  <MenuItem
+                    onClick={() => {
+                      navigate(`/profile/${notification.fromUser._id}`);
+                    }}
+                  >
+                    <Grid container alignItems="center" spacing={3}>
+                      <Grid item>
+                        <Avatar
+                          src={notification.fromUser.picturePath}
+                          sx={{ width: "50px", height: "50px" }}
+                        />
+                      </Grid>
+                      <Grid item xs>
+                        <Box>
+                          <Typography variant="subtitle1">
+                            {`${notification.fromUser.firstName} ${notification.fromUser.lastName}`}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {notification.fromUser.occupation}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {notification.fromUser.location}
+                          </Typography>
+                          {notification.type === "friend_request" && (
+                            <Typography variant="body2" color="primary" mt={1}>
+                              Friend Request
+                            </Typography>
+                          )}
+                          {notification.type === "post_liked" && (
+                            <>
+                              <Typography
+                                variant="body2"
+                                color="primary"
+                                mt={1}
+                              >
+                                Liked your post
+                              </Typography>
+                              <Typography variant="body2" color="textSecondary">
+                                {notification.post.description}
+                              </Typography>
+                            </>
+                          )}
+                          {notification.type === "post_commented" && (
+                            <>
+                              <Typography
+                                variant="body2"
+                                color="primary"
+                                mt={1}
+                              >
+                                Commented on your post
+                              </Typography>
+                              <Typography variant="body2" color="textSecondary">
+                                {Array.isArray(notification?.post?.comments) &&
+                                  notification?.post?.comments?.find(
+                                    (comment) =>
+                                      comment.id === notification.commentId
+                                  )?.body}
+                              </Typography>
+                              <Typography variant="body2" color="textSecondary">
+                                {notification.post.description}
+                              </Typography>
+                            </>
+                          )}
+                        </Box>
+                      </Grid>
+                      {notification.type === "friend_request" && (
+                        <Grid item>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            gap={1}
+                            ml={2}
+                          >
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                acceptRequest(
+                                  user._id,
+                                  notification.fromUser._id,
+                                  notification._id
+                                );
+                                dispatch(removeNotification(notification._id));
+                                enqueueSnackbar("Friend Request Accepted", {
+                                  variant: "success",
+                                });
+                              }}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                declineRequest(
+                                  user._id,
+                                  notification.fromUser._id,
+                                  notification._id
+                                );
+                                dispatch(removeNotification(notification._id));
+                                enqueueSnackbar("Friend Request Declined", {
+                                  variant: "warning",
+                                });
+                              }}
+                            >
+                              Decline
+                            </Button>
+                          </Box>
+                        </Grid>
+                      )}
+                      {notification.type !== "friend_request" && (
+                        <Grid item>
+                          <IconButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              dispatch(removeNotification(notification._id));
+                              // Remove from backend as well
+                              removeNotif(user._id, notification._id);
+                              enqueueSnackbar("Notification Removed", {
+                                variant: "info",
+                              });
+                            }}
+                            sx={{
+                              border: "1px solid #ccc", // Light gray border
+                              borderRadius: "50%", // Rounded corners
+                              padding: "4px", // Adding some padding for better spacing
+                              "&:hover": {
+                                borderColor: "#888", // Darker gray on hover
+                              },
+                            }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </MenuItem>
+                  <Divider />
+                </React.Fragment>
+              ))
             )}
-          </IconButton>
-          <IconButton>
-            <Message sx={{ fontSize: "25px" }} />
-          </IconButton>
-          <IconButton>
-            <Notifications sx={{ fontSize: "25px" }} />
-          </IconButton>
-          <IconButton>
-            <Help sx={{ fontSize: "25px" }} />
-          </IconButton>
-          <FormControl variant="standard" value={fullName}>
+          </Menu>
+          <Tooltip title={<Typography fontSize={13}>About</Typography>} arrow>
+            <IconButton>
+              <Help sx={{ fontSize: "25px" }} />
+            </IconButton>
+          </Tooltip>
+          <FormControl variant="standard">
             <Select
               value={fullName}
               sx={{
@@ -265,10 +839,9 @@ const Navbar = () => {
         <IconButton
           onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
         >
-          <Menu />
+          <MenuIcon />
         </IconButton>
       )}
-
       {/* MOBILE NAV */}
       {!isNonMobileScreens && isMobileMenuToggled && (
         <Box
@@ -298,6 +871,9 @@ const Navbar = () => {
             alignItems="center"
             gap="3rem"
           >
+            <IconButton onClick={() => navigate("/trending")}>
+              <TagSharp sx={{ fontSize: "25px" }} />
+            </IconButton>
             <IconButton
               onClick={() => dispatch(setMode())}
               sx={{ fontSize: "25px" }}
@@ -311,9 +887,25 @@ const Navbar = () => {
             <IconButton>
               <Message sx={{ fontSize: "25px" }} />
             </IconButton>
-            <Notifications sx={{ fontSize: "25px" }} />
-            <Help sx={{ fontSize: "25px" }} />
-            <FormControl variant="standard" value={fullName}>
+            <IconButton
+              onClick={handleNotificationClick}
+              aria-controls={open ? "notification-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+            >
+              <Badge
+                badgeContent={
+                  notifications.length > 0 ? notifications.length : null
+                }
+                color="secondary"
+              >
+                <Notifications sx={{ fontSize: "25px" }} />
+              </Badge>
+            </IconButton>
+            <IconButton>
+              <Help sx={{ fontSize: "25px" }} />
+            </IconButton>
+            <FormControl variant="standard">
               <Select
                 value={fullName}
                 sx={{

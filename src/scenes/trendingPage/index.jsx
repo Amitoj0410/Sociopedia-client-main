@@ -7,9 +7,11 @@ import PostsWidget from "scenes/widgets/PostsWidget";
 import AdvertWidget from "scenes/widgets/AdvertWidget";
 import FriendsListWidget from "scenes/widgets/FriendListWidget";
 import UnknownPeopleWidget from "scenes/widgets/UnknownPeopleWidget";
-import "./homepageStyles.css"; // Import the CSS file
+import "../homePage/homepageStyles.css"; // Import the CSS file
+import HashtagsWidget from "scenes/widgets/HashtagsWidget";
+import PostsByHashtagWidget from "scenes/widgets/PostsByHashtagWidget";
 
-const HomePage = () => {
+const TrendingPage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const { _id, picturePath } = useSelector((state) => state.user);
 
@@ -33,17 +35,18 @@ const HomePage = () => {
         justifyContent="space-between"
         mt="5rem"
       >
-        <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-          <UserWidget userId={_id} picturePath={picturePath} />
+        <Box flexBasis={isNonMobileScreens ? "20%" : undefined}>
+          {/* <UserWidget userId={_id} picturePath={picturePath} />
           <br />
-          <UnknownPeopleWidget userId={_id} />
+          <UnknownPeopleWidget userId={_id} /> */}
+          <HashtagsWidget />
         </Box>
         <Box
           flexBasis={isNonMobileScreens ? "42%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
-          <MyPostWidget picturePath={picturePath} userId={_id} />
-          <PostsWidget userId={_id} />
+          {/* <MyPostWidget picturePath={picturePath} userId={_id} /> */}
+          <PostsByHashtagWidget />
         </Box>
         {isNonMobileScreens && (
           <Box flexBasis="26%">
@@ -69,4 +72,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default TrendingPage;

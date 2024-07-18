@@ -1,6 +1,7 @@
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import Form from "./Form";
 import { useNavigate } from "react-router-dom";
+import "./styles.css"; // Import the CSS file
 
 const LoginPage = () => {
   const theme = useTheme();
@@ -11,7 +12,7 @@ const LoginPage = () => {
     <Box>
       <Box
         width="100%"
-        backgroundColor={theme.palette.background.alt}
+        // backgroundColor={theme.palette.background.alt}
         p="1rem 6%"
         textAlign="center"
       >
@@ -36,9 +37,10 @@ const LoginPage = () => {
       <Box
         width={isNonMobileScreens ? "50%" : "93%"}
         p="2rem"
-        m="2rem auto"
+        m="0.25rem auto"
         borderRadius="1.5rem"
         backgroundColor={theme.palette.background.alt}
+        className="form-container"
       >
         <Typography fontWeight="500" variant="h5" sx={{ mb: "1.5rem" }}>
           Welcome to Sociopedia, the Social Media for Sociopaths!

@@ -13,7 +13,7 @@ const FriendsListWidget = ({ userId }) => {
 
   const getFriends = async () => {
     const response = await fetch(
-      `https://socialpedia-serverr.onrender.com/users/${userId}/friends`,
+      `http://localhost:3001/users/${userId}/friends`,
       {
         method: "GET",
         headers: {
@@ -28,6 +28,14 @@ const FriendsListWidget = ({ userId }) => {
   useEffect(() => {
     getFriends();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     getFriends();
+  //   }, 5000);
+
+  //   return () => clearInterval(intervalId);
+  // }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <WidgetWrapper>
