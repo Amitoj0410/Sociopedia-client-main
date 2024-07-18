@@ -29,7 +29,7 @@ const HashtagsWidget = () => {
       }
       const data = await response.json();
       setHashtags(data);
-      console.log("Fetched hashtags:", data); // Debug
+      // console.log("Fetched hashtags:", data); // Debug
       // Fetch the number of posts for each hashtag
       data.forEach(async (singleTag) => {
         const count = await getNumberOfPostsByHashtags(singleTag.tag);
@@ -57,7 +57,7 @@ const HashtagsWidget = () => {
       }
       const data = await response.json();
       dispatch(setHashtagPosts(data));
-      console.log(`Fetched posts for hashtag ${tag}:`, data); // Log to verify fetched data
+      // console.log(`Fetched posts for hashtag ${tag}:`, data); // Log to verify fetched data
     } catch (error) {
       console.error("Error fetching posts by hashtag:", error.message);
     }

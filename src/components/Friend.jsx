@@ -94,7 +94,7 @@ const Friend = ({
       );
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         dispatch(setFriendRequestTo(data._id));
       } else {
         throw new Error("Failed to send friend request");

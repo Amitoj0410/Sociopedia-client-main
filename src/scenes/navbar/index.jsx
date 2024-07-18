@@ -59,7 +59,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
   const notifications = useSelector((state) => state.notifications);
-  console.log(notifications);
+  // console.log(notifications);
   const searchValue = useSelector((state) => state.searchValue);
   const token = useSelector((state) => state.token);
   const isNonMobileScreens = useMediaQuery("(min-width: 1093px)");
@@ -154,7 +154,7 @@ const Navbar = () => {
       );
       const users = await response.json();
       setSearchedPeople(users); // Update to use users directly
-      console.log(users);
+      // console.log(users);
     } else {
       setSearchedPeople([]);
     }
@@ -662,11 +662,11 @@ const Navbar = () => {
                       navigate(`/profile/${notification.fromUser._id}`);
                     }}
                   >
-                    <Grid container alignItems="center" spacing={3}>
+                    <Grid container alignItems="center" spacing={2}>
                       <Grid item>
                         <Avatar
                           src={notification.fromUser.picturePath}
-                          sx={{ width: "50px", height: "50px" }}
+                          sx={{ width: 50, height: 50 }}
                         />
                       </Grid>
                       <Grid item xs>
@@ -675,10 +675,12 @@ const Navbar = () => {
                             {`${notification.fromUser.firstName} ${notification.fromUser.lastName}`}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
-                            {notification.fromUser.occupation}
+                            {notification.type === "friend_request" &&
+                              notification.fromUser.occupation}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
-                            {notification.fromUser.location}
+                            {notification.type === "friend_request" &&
+                              notification.fromUser.location}
                           </Typography>
                           {notification.type === "friend_request" && (
                             <Typography variant="body2" color="primary" mt={1}>
@@ -772,7 +774,23 @@ const Navbar = () => {
                         </Grid>
                       )}
                       {notification.type !== "friend_request" && (
-                        <Grid item>
+                        <>
+                          {notification?.post?.picturePath && (
+                            <Grid item>
+                              <Box>
+                                <img
+                                  src={notification?.post?.picturePath} // URL of the image to display
+                                  alt="Notification"
+                                  style={{
+                                    width: "60px", // Adjusted size for larger image
+                                    height: "60px", // Adjusted size for larger image
+                                    borderRadius: "8px", // Rounded corners
+                                    objectFit: "cover", // Ensure image covers the specified dimensions
+                                  }}
+                                />
+                              </Box>
+                            </Grid>
+                          )}
                           <IconButton
                             onClick={(e) => {
                               e.stopPropagation();
@@ -790,11 +808,13 @@ const Navbar = () => {
                               "&:hover": {
                                 borderColor: "#888", // Darker gray on hover
                               },
+                              ml: "10px",
+                              mt: "5px",
                             }}
                           >
                             <CloseIcon />
                           </IconButton>
-                        </Grid>
+                        </>
                       )}
                     </Grid>
                   </MenuItem>

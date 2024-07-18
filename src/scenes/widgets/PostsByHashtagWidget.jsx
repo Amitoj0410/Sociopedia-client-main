@@ -10,9 +10,9 @@ const PostsByHashtagWidget = () => {
   const hashtagPosts = useSelector((state) => state.hashtagPosts) || []; // Default to empty array if null
   const [visiblePosts, setVisiblePosts] = useState(5);
 
-  useEffect(() => {
-    console.log(hashtagPosts);
-  }, [hashtagPosts]);
+  // useEffect(() => {
+  //   // console.log(hashtagPosts);
+  // }, [hashtagPosts]);
 
   const visiblePostsData = hashtagPosts.slice(0, visiblePosts);
 

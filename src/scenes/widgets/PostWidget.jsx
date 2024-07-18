@@ -180,14 +180,14 @@ const PostWidget = ({
       }
       const data = await response.json();
       dispatch(setHashtagPosts(data));
-      console.log(`Fetched posts for hashtag ${tag}:`, data); // Log to verify fetched data
+      // console.log(`Fetched posts for hashtag ${tag}:`, data); // Log to verify fetched data
     } catch (error) {
       console.error("Error fetching posts by hashtag:", error.message);
     }
   };
 
   const handleHashtagClick = (hashtag) => {
-    console.log(`Clicked on hashtag: ${hashtag}`);
+    // console.log(`Clicked on hashtag: ${hashtag}`);
     const cleanHashtag = hashtag.substring(1);
 
     // alert("hashtag clicked");
