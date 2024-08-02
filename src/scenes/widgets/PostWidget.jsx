@@ -241,8 +241,8 @@ const PostWidget = ({
             style={{
               borderRadius: "0.75rem",
               marginTop: "0.75rem",
-              maxHeight: "25rem",
-              objectFit: "cover",
+              // maxHeight: "25rem",
+              // objectFit: "scale-down",
             }}
           >
             <source src={videoPath} type="video/mp4" />
