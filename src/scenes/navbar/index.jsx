@@ -708,7 +708,7 @@ const Navbar = () => {
                                 color="primary"
                                 mt={1}
                               >
-                                Commented on your post
+                                Commented on your post: 
                               </Typography>
                               <Typography variant="body2" color="textSecondary">
                                 {Array.isArray(notification?.post?.comments) &&
@@ -718,7 +718,7 @@ const Navbar = () => {
                                   )?.body}
                               </Typography>
                               <Typography variant="body2" color="textSecondary">
-                                {notification.post.description}
+                                <strong>Post:</strong> {notification.post.description}
                               </Typography>
                             </>
                           )}
